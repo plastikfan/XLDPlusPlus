@@ -140,6 +140,9 @@ function run-batch {
 }
 
 <#
+.SEE
+  https://tmkk.undo.jp/xld/index_e.html
+
 .NAME
   xld-batch-convert
 
