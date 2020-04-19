@@ -30,6 +30,14 @@
   $from or $to, in order to avoid the potential for name clashes. This is really meant for
   auxilliary files like cover art jpg images and text files, or any other such meta data. The
   default is "*" meaning that all files are copied over subject to the caveats just mentioned.
+
+.PARAMETER $Skip
+  Skip existing audio file version if it already exists in the destination. This makes the script
+  re-runable if for any reason, a previous run had to be aborted; leaving the destination tree
+  incomplete.
+
+.PARAMETER $WhatIf
+  Dry-run the operation.
 #>
 function run-batch {
   param
@@ -40,6 +48,7 @@ function run-batch {
     [parameter(Mandatory = $true)] [String]$to,
     [String]$copyFiles = "*",
 
+    [Switch]$Skip,
     [Switch]$WhatIf
   )
 
@@ -53,6 +62,7 @@ function run-batch {
     [string]$rootSource = $properties["ROOT-SOURCE"];
     [string]$rootDestination = $properties["ROOT-DESTINATION"];
     [string]$format = $properties["TO-FORMAT"];
+    [boolean]$skipExisting = $properties.ContainsKey("SKIP");
 
     [string]$destinationBranch = Subtract-First -target $sourceFullname -subtract $rootSource;
     [string]$destinationAudioFilename = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
@@ -60,7 +70,23 @@ function run-batch {
     write-pair-in-colour @( ("destination audio file", "Yellow"), ($destinationAudioFilename, "Red") );
 
     [string]$command = ("xld -f '" + $format + "' -o '" + $destinationAudioFilename + "' '" + $sourceFullname + "'");
-    write-pair-in-colour @( ("command: ", "Red"), ($command, "Green") );
+    [boolean]$doConversion = $true;
+
+    if (Test-Path -Path $destinationAudioFilename) {
+      if ($skipExisting) {
+        Write-Warning ("!!! Skipping existing file: '" + $destinationAudioFilename + "'");
+        $doConversion = $false;
+      } else {
+        Write-Warning ("!!! Overwriting existing file: '" + $destinationAudioFilename + "'");
+      }
+    }
+  
+    if ($doConversion) {
+      write-pair-in-colour @( ("command: ", "Red"), ($command, "Green") );
+      # TODO: invoke the command
+      #
+      # Invoke-Expression -Command $command
+    }
   
     [string]$message = ("*** Convert source audio file: '" + $sourceFilename + "'");
     return @{ Message = $message; Product = $sourceFullname; Colour = $conversionColour; Trigger = $true };
@@ -73,6 +99,10 @@ function run-batch {
     "FROM-SUFFIX" = $from;
     "COPY-FILES" = $copyFiles;
   };
+
+  if ($Skip.ToBool()) {
+    $propertyBag["SKIP"] = $true;
+  }
  
   # Copy over other files
   #
@@ -136,6 +166,14 @@ function run-batch {
   $from or $to, in order to avoid the potential for name clashes. This is really meant for
   auxilliary files like cover art jpg images and text files, or any other such meta data. The
   default is "*" meaning that all files are copied over subject to the caveats just mentioned.
+
+.PARAMETER $Skip
+  Skip existing audio file version if it already exists in the destination. This makes the script
+  re-runable if for any reason, a previous run had to be aborted; leaving the destination tree
+  incomplete.
+
+.PARAMETER $WhatIf
+  Dry-run the operation.
 #>
 function xld-batch-convert {
   param
@@ -146,6 +184,7 @@ function xld-batch-convert {
     [parameter(Mandatory = $true)] [String]$to,
     [String]$copyFiles = "*",
 
+    [Switch]$Skip,
     [Switch]$WhatIf
   )
 
