@@ -1,6 +1,4 @@
 
-$ImageFileExclusions = "*.db,*.txt";
-
 <#
 .NAME
   foreach-directory
@@ -11,19 +9,24 @@ $ImageFileExclusions = "*.db,*.txt";
 
 .PARAMETER $directory
   The parent directory to iterate
+
 .PARAMETER $filter
   The filter to apply to Get-ChildItem
+
 .PARAMETER $condition
   The result of Get-ChildItem is piped to a where statement whose condition is specified by
   this parameter. The (optional) scriptblock specified must be a predicate script block.
+
 .PARAMETER $body
   The implementation script block that is to be implemented for each child directory. The
   script block can either return $null or a psobject with fields Message(string) giving an
   indication of what was implemented, Product (string) which represents the item in question
   (ie the processed item as approriapte) and Colour(string) which is the console colour
   applied to the Product.
+
 .PARAMETER $eachItemLine
   The line type to display after each directory iteration.
+
 .PARAMETER $endOfProcessingLine
   The line type to display at the end of the directory iteration.
 #>
@@ -35,6 +38,7 @@ function foreach-directory {
     [string]$filter = "*",
     [scriptblock]$condition = ({ return $true; }),
     [scriptblock]$body,
+    [System.Collections.Hashtable]$propertyBag = @{ },
     [string]$eachItemLine = $EqualsLine,
     [string]$endOfProcessingLine = $UnderscoreLine
   )
@@ -60,7 +64,7 @@ function foreach-directory {
     write-pair-in-colour @( (">>> Original directory name", $GeneralMessageDescColour), `
       ($name, $OriginalItemColour) );
 
-    $result = $body.Invoke($_, $index);
+    $result = $body.Invoke($_, $index, $propertyBag);
 
     if (($null -ne $result) -and (-not [string]::IsNullOrEmpty($result.Message))) {
 
@@ -87,11 +91,14 @@ function foreach-directory {
 
 .PARAMETER $directory
   The parent directory to iterate
+
 .PARAMETER $filter
   The filter to apply to Get-ChildItem
+
 .PARAMETER $condition
   The result of Get-ChildItem is piped to a where statement whose condition is specified by
   this parameter. The (optional) scriptblock specified must be a predicate script block.
+
 .PARAMETER $body
   The implementation script block that is to be implemented for each child file. The
   script block can either return $null or a psobject with fields Message(string) giving an
@@ -101,14 +108,18 @@ function foreach-directory {
   for any of the files iterated. This is so because if we iterate a collection of files, but the
   operation doesnt do anything to any of the files, then the whole operation should be considered
   a no-op, so we can keep output to a minimum.
+
 .PARAMETER $summary
   A summary message to be displayed at the end of processing. Because using this command can be
   very verbose, the caller can use this in non Verbose mode and choose to summarise the operation
-  with the summary.  
+  with the summary.
+
 .PARAMETER $eachItemLine
   The line type to display after each directory iteration.
+
 .PARAMETER $endOfProcessingLine
   The line type to display at the end of the directory iteration.
+
 .PARAMETER $Verb (THIS IS SUPOSED TO BE VERBOSE)
   Flag to indicate wether any output is generated for each file. Any output generated at a
   file level may become too much depending on the compound functionality implemented.
@@ -126,6 +137,7 @@ function foreach-file {
     [string]$inclusions,
     [scriptblock]$condition = ( { return $true; }),
     [scriptblock]$body,
+    [System.Collections.Hashtable]$propertyBag = @{ },
     [String]$summary,
     [string]$eachItemLine = $LightDotsLine,
     [string]$endOfProcessingLine = $UnderscoreLine,
@@ -160,7 +172,7 @@ function foreach-file {
 
     # Do the invoke
     #
-    $result = $body.Invoke($_, $index, $trigger);
+    $result = $body.Invoke($_, $index, $propertyBag, $trigger);
 
     # Hande the result
     #
@@ -193,4 +205,74 @@ function foreach-file {
   }
 
   return $collection;
+}
+
+<#
+.NAME
+  traverse-directory
+.SYNOPSIS
+  Peforms a recursive traversal of the source directory tree specified. The source tree
+  is mirrored in the destination and invokes the script block for all the files found
+  in the source tree in the corresponding location in the destination tree.
+
+.PARAMETER $source
+  The root of the source tree to traverse. (Must exist)
+
+.PARAMETER $destination
+  The root of the destination tree to traverse. (Does not need to exist prior to running)
+
+.PARAMETER $suffix
+  The file suffix in the source tree to which the script block is to be applied.
+
+.PARAMETER $block
+  The custom script block, which contains the implementation invoked for each file with
+  the suffix specified in the source tree.
+
+.PARAMETER $propertyBag
+  A hashtable containing custom properties required by the script block. This property bag
+  must also include properties named "ROOT-SOURCE" and "ROOT-DESTINATION" which specify
+  the root paths of the source and destination file system locations respectively.
+
+.PARAMETER $WhatIf
+  Perform a dry run of the operation.
+#>
+function traverse-directory {
+  param
+  (
+    [parameter(Mandatory = $true)] [String]$source,
+    [parameter(Mandatory = $true)] [String]$destination,
+    [parameter(Mandatory = $true)] [String]$suffix,
+    [parameter(Mandatory = $true)] [scriptblock]$block,
+    [parameter(Mandatory = $true)] [System.Collections.Hashtable]$propertyBag,
+    [Switch]$WhatIf
+  )
+
+  $inclusions = "*." + $suffix;
+  $summary = "<SUMMARY ...>";
+
+  foreach-file -Directory $source -inclusions $inclusions -body $block -propertyBag $propertyBag `
+    -summary $summary -Verb;
+
+  # Convert directory contents
+  #
+  [scriptblock]$doTraversal = { param($underscore, $index, $properties)
+
+    $rootSource = $properties["ROOT-SOURCE"];
+    $rootDestination = $properties["ROOT-DESTINATION"];
+
+    $sourceDirectoryName = $underscore.Name;
+    $sourceDirectoryFullName = $underscore.FullName;
+    $contentsColour = "Green";
+
+    $destinationBranch = Subtract-First -target $sourceDirectoryFullName -subtract $rootSource;
+    $destinationDirectory = Join-Path -Path $rootDestination  -ChildPath $destinationBranch;
+    write-pair-in-colour @( ("destination directory", "Yellow"), ($destinationDirectory, "Red") );
+
+    traverse-directory -source $sourceDirectoryFullName -destination $destinationDirectory `
+      -suffix $from -block $block -propertyBag $propertyBag;
+
+    return @{ Message = "*** Convert directory contents"; Product = $sourceDirectoryName; Colour = $contentsColour };
+  }
+
+  $null = foreach-directory -Directory $source -body $doTraversal -propertyBag $propertyBag;
 }
