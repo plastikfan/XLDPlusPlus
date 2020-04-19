@@ -23,6 +23,13 @@
 
 .PARAMETER $to
   The audio format to convert to. See xld help for supported formats.
+
+.PARAMETER $copyFiles
+  Denotes which other files to copy over from the source tree to the destination expressed as a
+  csv of wildcard file suffixes. The copied files will not include any files whose suffix match either
+  $from or $to, in order to avoid the potential for name clashes. This is really meant for
+  auxilliary files like cover art jpg images and text files, or any other such meta data. The
+  default is "*" meaning that all files are copied over subject to the caveats just mentioned.
 #>
 function run-batch {
   param
@@ -31,6 +38,7 @@ function run-batch {
     [parameter(Mandatory = $true)] [String]$destination,
     [parameter(Mandatory = $true)] [String]$from,
     [parameter(Mandatory = $true)] [String]$to,
+    [String]$copyFiles = "*",
 
     [Switch]$WhatIf
   )
@@ -39,35 +47,66 @@ function run-batch {
   #
   [scriptblock]$doAudioFileConversion = { param($underscore, $index, $properties, $trigger)
 
-    $sourceFilename = $underscore.Name;
-    $sourceFullname = $underscore.FullName;
-    $conversionColour = "Cyan";
-    $rootSource = $properties["ROOT-SOURCE"];
-    $rootDestination = $properties["ROOT-DESTINATION"];
-    $format = $properties["TO-FORMAT"];
+    [string]$sourceFilename = $underscore.Name;
+    [string]$sourceFullname = $underscore.FullName;
+    [string]$conversionColour = "Cyan";
+    [string]$rootSource = $properties["ROOT-SOURCE"];
+    [string]$rootDestination = $properties["ROOT-DESTINATION"];
+    [string]$format = $properties["TO-FORMAT"];
 
-    $destinationBranch = Subtract-First -target $sourceFullname -subtract $rootSource;
-    $destinationAudioFilename = Join-Path -Path $rootDestination  -ChildPath $destinationBranch;
+    [string]$destinationBranch = Subtract-First -target $sourceFullname -subtract $rootSource;
+    [string]$destinationAudioFilename = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
     $destinationAudioFilename = ((Truncate-Extension -path $destinationAudioFilename) + "." + $format);
     write-pair-in-colour @( ("destination audio file", "Yellow"), ($destinationAudioFilename, "Red") );
 
-    $command = ("xld -f '" + $format + "' -o '" + $destinationAudioFilename + "' '" + $sourceFullname + "'");
+    [string]$command = ("xld -f '" + $format + "' -o '" + $destinationAudioFilename + "' '" + $sourceFullname + "'");
     write-pair-in-colour @( ("command: ", "Red"), ($command, "Green") );
   
-    $message = ("*** Convert source audio file: '" + $sourceFilename + "'");
+    [string]$message = ("*** Convert source audio file: '" + $sourceFilename + "'");
     return @{ Message = $message; Product = $sourceFullname; Colour = $conversionColour; Trigger = $true };
   }
-
-  # $propertyBag = @{ };
 
   $propertyBag = @{
     "ROOT-SOURCE" = $source;
     "ROOT-DESTINATION" = $destination;
     "TO-FORMAT" = $to;
+    "FROM-SUFFIX" = $from;
+    "COPY-FILES" = $copyFiles;
   };
  
-  traverse-directory -source $source -destination $destination `
-    -suffix $from -block $doAudioFileConversion -propertyBag $propertyBag;
+  # Copy over other files
+  #
+  [scriptblock] $doCopyFiles = { param($source, $properties)
+    [string]$suffix = $properties["FROM-SUFFIX"];
+    [string]$includes = $properties["COPY-FILES"];
+    [string]$format = $properties["TO-FORMAT"];
+    write-pair-in-colour @( ("Copy files ...", "Blue"), ($includes, "Red") );
+
+    [scriptblock]$isCopyCandidate = { param($underscore)
+      [string]$filename = $underscore.Name;
+      [boolean]$result = (!($filename.EndsWith($suffix)) -and (!($filename.EndsWith($format))));
+      return $result;
+    }
+
+    [scriptblock]$doCopySingleFile = { param($underscore, $index, $properties, $trigger)
+      [string]$sourceFullname = $underscore.FullName;
+
+      [string]$rootSource = $properties["ROOT-SOURCE"];
+      [string]$rootDestination = $properties["ROOT-DESTINATION"];
+
+
+      [string]$destinationBranch = Subtract-First -target $sourceFullname -subtract $rootSource;
+      [string]$copyToDestinationFullName = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
+
+      Copy-Item -LiteralPath $sourceFullname -Destination $copyToDestinationFullName -WhatIf;
+    }
+
+    foreach-file -Directory $source -inclusions $includes -condition $isCopyCandidate -body $doCopySingleFile `
+      -propertyBag $propertyBag -Verb;
+  }
+
+  traverse-directory -source $source -destination $destination -suffix $from `
+    -onSourceFile $doAudioFileConversion -propertyBag $propertyBag -onSourceDirectory $doCopyFiles;
 }
 
 <#
@@ -85,11 +124,18 @@ function run-batch {
   have to exist prior to running. The source tree is mirrored here in the destination tree.
 
 .PARAMETER $from
-  The audio format from which to convert. See xld help for supported formats. Only the files that match
-  this format will be converted.
+  The audio format from which to convert. See xld help for supported formats. Only the files
+  that match this format will be converted.
 
 .PARAMETER $to
   The audio format to convert to. See xld help for supported formats.
+
+.PARAMETER $copyFiles
+  Denotes which other files to copy over from the source tree to the destination expressed as a
+  csv of file suffixes. The copied files will not include any files whose suffix match either
+  $from or $to, in order to avoid the potential for name clashes. This is really meant for
+  auxilliary files like cover art jpg images and text files, or any other such meta data. The
+  default is "*" meaning that all files are copied over subject to the caveats just mentioned.
 #>
 function xld-batch-convert {
   param
@@ -98,6 +144,7 @@ function xld-batch-convert {
     [parameter(Mandatory = $true)] [String]$destination,
     [parameter(Mandatory = $true)] [String]$from,
     [parameter(Mandatory = $true)] [String]$to,
+    [String]$copyFiles = "*",
 
     [Switch]$WhatIf
   )
@@ -124,5 +171,5 @@ function xld-batch-convert {
     return;
   }
 
-  run-batch -source $source -destination $destination -from $from -to $to
+  run-batch -source $source -destination $destination -from $from -to $to -copyFiles $copyFiles
 }

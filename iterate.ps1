@@ -224,7 +224,7 @@ function foreach-file {
 .PARAMETER $suffix
   The file suffix in the source tree to which the script block is to be applied.
 
-.PARAMETER $block
+.PARAMETER $onSourceFile
   The custom script block, which contains the implementation invoked for each file with
   the suffix specified in the source tree.
 
@@ -232,6 +232,11 @@ function foreach-file {
   A hashtable containing custom properties required by the script block. This property bag
   must also include properties named "ROOT-SOURCE" and "ROOT-DESTINATION" which specify
   the root paths of the source and destination file system locations respectively.
+
+.PARAMETER $onSourceDirectory
+  The custom script block, which contains the implementation invoked for each source directory.
+  The $onSourceDirectory script block takes 2 parameters, $source; the source directory and
+  a custom property bag $propertyBag
 
 .PARAMETER $WhatIf
   Perform a dry run of the operation.
@@ -242,15 +247,16 @@ function traverse-directory {
     [parameter(Mandatory = $true)] [String]$source,
     [parameter(Mandatory = $true)] [String]$destination,
     [parameter(Mandatory = $true)] [String]$suffix,
-    [parameter(Mandatory = $true)] [scriptblock]$block,
+    [parameter(Mandatory = $true)] [scriptblock]$onSourceFile,
     [parameter(Mandatory = $true)] [System.Collections.Hashtable]$propertyBag,
+    [scriptblock]$onSourceDirectory = ({ return $true; }),
     [Switch]$WhatIf
   )
 
   $inclusions = "*." + $suffix;
   $summary = "<SUMMARY ...>";
 
-  foreach-file -Directory $source -inclusions $inclusions -body $block -propertyBag $propertyBag `
+  foreach-file -Directory $source -inclusions $inclusions -body $onSourceFile -propertyBag $propertyBag `
     -summary $summary -Verb;
 
   # Convert directory contents
@@ -269,10 +275,14 @@ function traverse-directory {
     write-pair-in-colour @( ("destination directory", "Yellow"), ($destinationDirectory, "Red") );
 
     traverse-directory -source $sourceDirectoryFullName -destination $destinationDirectory `
-      -suffix $from -block $block -propertyBag $propertyBag;
+      -suffix $from -onSourceFile $onSourceFile -propertyBag $propertyBag -onSourceDirectory $onSourceDirectory;
 
     return @{ Message = "*** Convert directory contents"; Product = $sourceDirectoryName; Colour = $contentsColour };
   }
 
   $null = foreach-directory -Directory $source -body $doTraversal -propertyBag $propertyBag;
+
+  # Invoke the source directory block
+  #
+  $null = $onSourceDirectory.Invoke($source, $propertyBag);
 }
