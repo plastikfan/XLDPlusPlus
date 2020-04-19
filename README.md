@@ -50,7 +50,7 @@ Eg: to copy over just text files (\*.txt) and jpeg images (\*.jp\*g), specify: -
 
 Use the *-Skip* switch argument
 
-- Skip existing audio file version if it already exists in the destination. This makes the script
+- Skip existing audio file conversion if it already exists in the destination. This makes the script
   re-runnable if for any reason, a previous run had to be aborted; leaving the destination tree
   incomplete. Use the *-Skip* option, if you want to resume a previous batch run without re-converting files that have already been converted.
 
