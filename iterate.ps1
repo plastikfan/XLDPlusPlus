@@ -1,7 +1,7 @@
 
 <#
 .NAME
-  foreach-directory
+  Invoke-ForeachDirectory
 
 .SYNOPSIS
   Performs iteration over a collection of directories which are children of the directory
@@ -30,7 +30,7 @@
 .PARAMETER $endOfProcessingLine
   The line type to display at the end of the directory iteration.
 #>
-function foreach-directory {
+function Invoke-ForeachDirectory {
   param
   (
     [parameter(Mandatory = $true)]
@@ -61,19 +61,19 @@ function foreach-directory {
 
     $name = $_.Name;
 
-    write-pair-in-colour @( (">>> Original directory name", $GeneralMessageDescColour), `
+    Write-PairInColour @( (">>> Original directory name", $GeneralMessageDescColour), `
       ($name, $OriginalItemColour) );
 
     $result = $body.Invoke($_, $index, $propertyBag);
 
     if (($null -ne $result) -and (-not [string]::IsNullOrEmpty($result.Message))) {
 
-      write-pair-in-colour @( ($result.Message, $GeneralMessageDescColour), `
+      Write-PairInColour @( ($result.Message, $GeneralMessageDescColour), `
         ($result.Product, $result.Colour) );
     }
   } # ForEach-Object
 
-  write-pair-in-colour @( ("••• Directory count", $GeneralMessageDescColour), `
+  Write-PairInColour @( ("••• Directory count", $GeneralMessageDescColour), `
     ($index, "Red") );
 
   Write-Host "$endOfProcessingLine" -ForegroundColor $LineColour;
@@ -83,7 +83,7 @@ function foreach-directory {
 
 <#
 .NAME
-  foreach-file
+  Invoke-ForeachFile
 
 .SYNOPSIS
   Performs iteration over a collection of files which are children of the directory
@@ -128,7 +128,7 @@ function foreach-directory {
   Number of files found.
 #>
 
-function foreach-file {
+function Invoke-ForeachFile {
   param
   (
     [parameter(Mandatory = $true)]
@@ -153,7 +153,8 @@ function foreach-file {
   [boolean]$isVerbose = $Verb.ToBool();
   [boolean]$trigger = $false;
 
-  $collection = Get-ChildItem -Path (Add-Wildcard($directory)) -File -Filter $filter -Include $inclusions | Sort-FilesNatural | Where-Object {
+  $collection = Get-ChildItem -Path (Add-Wildcard($directory)) -File -Filter $filter -Include $inclusions `
+    | Get-SortedFilesNatural | Where-Object {
     $condition.Invoke($_);
   } | ForEach-Object {
 
@@ -166,7 +167,7 @@ function foreach-file {
     $name = $_.Name;
 
     if ($isVerbose) {
-      write-pair-in-colour @( (">>> Original file name", $GeneralMessageDescColour), `
+      Write-PairInColour @( (">>> Original file name", $GeneralMessageDescColour), `
         ($name, $OriginalItemColour) );
     }
 
@@ -179,7 +180,7 @@ function foreach-file {
     if ($result) {
       if ($isVerbose) {
 
-        write-pair-in-colour @( ($result.Message, $GeneralMessageDescColour), `
+        Write-PairInColour @( ($result.Message, $GeneralMessageDescColour), `
           ($result.Product, $result.Colour) );
       }
 
@@ -196,7 +197,7 @@ function foreach-file {
   if ($trigger -and (-not ([String]::IsNullOrEmpty($summary)))) {
     Write-Host "$endOfProcessingLine" -ForegroundColor $LineColour;
 
-    write-2pair-in-colour @(
+    Write-2PairInColour @(
       ("Summary", $GeneralMessageDescColour), ($summary, "Yellow"),
       ("No of files", $GeneralMessageDescColour), ($index.ToString(), $GeneralMessageValueColour)
     );
@@ -209,7 +210,7 @@ function foreach-file {
 
 <#
 .NAME
-  traverse-directory
+  Invoke-TraverseDirectory
 .SYNOPSIS
   Peforms a recursive traversal of the source directory tree specified. The source tree
   is mirrored in the destination and invokes the script block for all the files found
@@ -241,7 +242,7 @@ function foreach-file {
 .PARAMETER $WhatIf
   Perform a dry run of the operation.
 #>
-function traverse-directory {
+function Invoke-TraverseDirectory {
   param
   (
     [parameter(Mandatory = $true)] [String]$source,
@@ -256,7 +257,7 @@ function traverse-directory {
   $inclusions = "*." + $suffix;
   $summary = "<SUMMARY ...>";
 
-  foreach-file -Directory $source -inclusions $inclusions -body $onSourceFile -propertyBag $propertyBag `
+  Invoke-ForeachFile -Directory $source -inclusions $inclusions -body $onSourceFile -propertyBag $propertyBag `
     -summary $summary -Verb;
 
   # Convert directory contents
@@ -270,17 +271,17 @@ function traverse-directory {
     $sourceDirectoryFullName = $underscore.FullName;
     $contentsColour = "Green";
 
-    $destinationBranch = Subtract-First -target $sourceDirectoryFullName -subtract $rootSource;
+    $destinationBranch = Edit-SubtractFirst -target $sourceDirectoryFullName -subtract $rootSource;
     $destinationDirectory = Join-Path -Path $rootDestination  -ChildPath $destinationBranch;
-    write-pair-in-colour @( ("destination directory", "Yellow"), ($destinationDirectory, "Red") );
+    Write-PairInColour @( ("destination directory", "Yellow"), ($destinationDirectory, "Red") );
 
-    traverse-directory -source $sourceDirectoryFullName -destination $destinationDirectory `
+    Invoke-TraverseDirectory -source $sourceDirectoryFullName -destination $destinationDirectory `
       -suffix $from -onSourceFile $onSourceFile -propertyBag $propertyBag -onSourceDirectory $onSourceDirectory;
 
     return @{ Message = "*** Convert directory contents"; Product = $sourceDirectoryName; Colour = $contentsColour };
   }
 
-  $null = foreach-directory -Directory $source -body $doTraversal -propertyBag $propertyBag;
+  $null = Invoke-ForeachDirectory -Directory $source -body $doTraversal -propertyBag $propertyBag;
 
   # Invoke the source directory block
   #

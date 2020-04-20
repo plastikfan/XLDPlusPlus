@@ -1,7 +1,7 @@
 
 <#
 .NAME
-    write-host-in-colour
+    Write-InColour
 
 .SYNOPSIS
     The user passes in an array of 1,2 or 3 element arrays, which contains any number of text fragments
@@ -14,16 +14,16 @@
 
     If the background colour is required, then the foreground colour must also be specified.
 
-    write-host-in-colour -colouredTextLine  @( ("some text", "Blue"),  ("some more text", "Red", "White") )
-    write-host-in-colour -colouredTextLine  @( ("some text", "Blue"),  ("some more text", "Red") )
-    write-host-in-colour -colouredTextLine  @( ("some text", "Blue"),  ("some more text") )
+    Write-InColour -colouredTextLine  @( ("some text", "Blue"),  ("some more text", "Red", "White") )
+    Write-InColour -colouredTextLine  @( ("some text", "Blue"),  ("some more text", "Red") )
+    Write-InColour -colouredTextLine  @( ("some text", "Blue"),  ("some more text") )
 
     If you only need to write a single element, use an extra , preceding the array eg:
 
-    write-host-in-colour -colouredTextLine  @( ,@("some text", "Blue") )
+    Write-InColour -colouredTextLine  @( ,@("some text", "Blue") )
 
 #>
-function write-host-in-colour {
+function Write-InColour {
   param
   (
     $colouredTextLine,
@@ -68,18 +68,18 @@ function write-host-in-colour {
 
 <#
 .NAME
-    write-pair-in-colour
+    Write-PairInColour
 
 .SYNOPSIS
     Writes a key value pair in colour; array size should be 2.
 
 .EXAMPLE                    1                   2
-    write-pair-in-colour @( ("Artist", "BLUE"), ("Garbage", "Red") )
+    Write-PairInColour @( ("Artist", "BLUE"), ("Garbage", "Red") )
 
     prints:
     Artist: 'Garbage'
 #>
-function write-pair-in-colour {
+function Write-PairInColour {
   param
   (
     $colouredText
@@ -87,7 +87,7 @@ function write-pair-in-colour {
 
   if ($colouredText.Length -eq 2) {
 
-    write-host-in-colour -colouredTextLine @( ($colouredText[0]), (": '", "White"), ($colouredText[1]), ("'", "White"));
+    Write-InColour -colouredTextLine @( ($colouredText[0]), (": '", "White"), ($colouredText[1]), ("'", "White"));
   }
   else {
 
@@ -97,18 +97,18 @@ function write-pair-in-colour {
 
 <#
 .NAME
-    write-message-and-pair-in-colour
+    Write-MessageAndPairInColour
 
 .SYNOPSIS
     Writes a body message followed by a key value pair in colour; array size should be 3.
 
 .EXAMPLE                                0                         1                   2
-    write-message-and-pair-in-colour @( ("Hello world", "Green"), ("Artist", "Blue"), ("Garbage", "Cyan") )
+    Write-MessageAndPairInColour @( ("Hello world", "Green"), ("Artist", "Blue"), ("Garbage", "Cyan") )
 
     prints:
     Hello world ==> Artist: 'Garbage'.
 #>
-function write-message-and-pair-in-colour {
+function Write-MessageAndPairInColour {
   param
   (
     $colouredText
@@ -116,9 +116,9 @@ function write-message-and-pair-in-colour {
 
   if ($colouredText.Length -eq 3) {
 
-    # TODO (BUG in write-host-in-colour): Shouldn't need to specify the White Colour here
+    # TODO (BUG in Write-InColour): Shouldn't need to specify the White Colour here
     #
-    write-host-in-colour -colouredTextLine @(
+    Write-InColour -colouredTextLine @(
       ($colouredText[0]), (" ==> ", "White"),
       ($colouredText[1]), (": '", "White"), ($colouredText[2]), ("'.", "White")
     );
@@ -126,24 +126,24 @@ function write-message-and-pair-in-colour {
   else {
 
     $len = $colouredText.Length;
-    Write-Warning "write-2pair-in-colour: Malformed message, Field length: $len";
+    Write-Warning "Write-MessageAndPairInColour: Malformed message, Field length: $len";
   }
 }
 
 <#
 .NAME
-    write-2pair-in-colour
+    Write-2PairInColour
 
 .SYNOPSIS
     Writes 2 key value pairs in colour; array size should be 4.
 
 .EXAMPLE                     0                   1                    2                        3
-    write-2pair-in-colour @( ("Artist", "Blue"), ("Garbage", "Cyan"), ("Song", "DarkYellow"),  ("Supervixen", "Yellow") )
+    Write-2PairInColour @( ("Artist", "Blue"), ("Garbage", "Cyan"), ("Song", "DarkYellow"),  ("Supervixen", "Yellow") )
 
     prints:
     Artist: 'Garbage', Song: 'Supervixen'.
 #>
-function write-2pair-in-colour {
+function Write-2PairInColour {
   param
   (
     $colouredText
@@ -151,7 +151,7 @@ function write-2pair-in-colour {
 
   if ($colouredText.Length -eq 4) {
 
-    write-host-in-colour -colouredTextLine @(
+    Write-InColour -colouredTextLine @(
       ($colouredText[0]), (": '", "White"), ($colouredText[1]), ("', ", "White"),
       ($colouredText[2]), (": '", "White"), ($colouredText[3]), ("'.", "White")
     );
@@ -159,24 +159,24 @@ function write-2pair-in-colour {
   else {
 
     $len = $colouredText.Length;
-    Write-Warning "write-2pair-in-colour: Malformed message, Field length: $len";
+    Write-Warning "Write-2PairInColour: Malformed message, Field length: $len";
   }
 }
 
 <#
 .NAME
-    write-message-and-2pair-in-colour
+    Write-MessageAnd2pairInColour
 
 .SYNOPSIS
     Writes 2 key value pairs in colour; array size should be 5.
 
 .EXAMPLE                                 0                         1                   2                    3                        4
-    write-message-and-2pair-in-colour @( ("Hello World", "Green"), ("Artist", "Blue"), ("Garbage", "Cyan"), ("Song", "DarkYellow"),  ("Supervixen", "Yellow") )
+    Write-MessageAnd2pairInColour @( ("Hello World", "Green"), ("Artist", "Blue"), ("Garbage", "Cyan"), ("Song", "DarkYellow"),  ("Supervixen", "Yellow") )
 
     prints:
     Hello World ==> Artist: 'Garbage', Song: 'Supervixen'.
 #>
-function write-message-and-2pair-in-colour {
+function Write-MessageAnd2pairInColour {
   param
   (
     $colouredText
@@ -184,7 +184,7 @@ function write-message-and-2pair-in-colour {
 
   if ($colouredText.Length -eq 5) {
 
-    write-host-in-colour -colouredTextLine @(
+    Write-InColour -colouredTextLine @(
       ($colouredText[0]), (" ==> ", "White"),
       ($colouredText[1]), (": '", "White"), ($colouredText[2]), ("', ", "White"),
       ($colouredText[3]), (": '", "White"), ($colouredText[4]), ("'.", "White")
@@ -193,24 +193,24 @@ function write-message-and-2pair-in-colour {
   else {
 
     $len = $colouredText.Length;
-    Write-Warning "write-message-and-2pair-in-colour: Malformed message, Field length: $len";
+    Write-Warning "Write-MessageAnd2pairInColour: Malformed message, Field length: $len";
   }
 }
 
 <#
 .NAME
-    write-3pair-in-colour
+    Write-3PairInColour
 
 .SYNOPSIS
     Writes 3 key value pairs in colour; array size should be 6.
 
 .EXAMPLE                     0                   1                    2                  3                           4                        5
-    write-3pair-in-colour @( ("Artist", "Blue"), ("Garbage", "Cyan"), ("Album", "Blue"), ("Deluxe Edition", "Cyan"), ("Song", "DarkYellow"),  ("Supervixen", "Yellow"))
+    Write-3PairInColour @( ("Artist", "Blue"), ("Garbage", "Cyan"), ("Album", "Blue"), ("Deluxe Edition", "Cyan"), ("Song", "DarkYellow"),  ("Supervixen", "Yellow"))
 
     prints:
     Artist: 'Garbage', Album: 'Deluxe Edition', Song: 'Supervixen'.
 #>
-function write-3pair-in-colour {
+function Write-3PairInColour {
   param
   (
     $colouredText
@@ -218,7 +218,7 @@ function write-3pair-in-colour {
 
   if ($colouredText.Length -eq 6) {
 
-    write-host-in-colour -colouredTextLine @(
+    Write-InColour -colouredTextLine @(
       ($colouredText[0]), (": '", "White"), ($colouredText[1]), ("', ", "White"),
       ($colouredText[2]), (": '", "White"), ($colouredText[3]), ("', ", "White"),
       ($colouredText[4]), (": '", "White"), ($colouredText[5]), ("'.", "White")
@@ -227,24 +227,24 @@ function write-3pair-in-colour {
   else {
 
     $len = $colouredText.Length;
-    Write-Warning "write-3pair-in-colour: Malformed message, Field length: $len";
+    Write-Warning "Write-3PairInColour: Malformed message, Field length: $len";
   }
 }
 
 <#
 .NAME
-    write-message-and-3pair-in-colour
+    Write-MessageAnd3PairInColour
 
 .SYNOPSIS
     Writes a message body and 3 key value pairs in colour; array size should be 7.
 
 .EXAMPLE                                 0                         1                   2                    3                    4                           5                         6
-    write-message-and-3pair-in-colour @( ("Hello World", "Green"), ("Artist", "Blue"), ("Garbage", "Cyan"), ("Album", "Blue"), ("Deluxe Edition", "Cyan"), ("Song", "DarkYellow"),  ("Supervixen", "Yellow"))
+    Write-MessageAnd3PairInColour @( ("Hello World", "Green"), ("Artist", "Blue"), ("Garbage", "Cyan"), ("Album", "Blue"), ("Deluxe Edition", "Cyan"), ("Song", "DarkYellow"),  ("Supervixen", "Yellow"))
 
     prints:
     Hello World ==> Artist: 'Garbage', Album: 'Deluxe Edition', Song: 'Supervixen'.
 #>
-function write-message-and-3pair-in-colour {
+function Write-MessageAnd3PairInColour {
   param
   (
     $colouredText
@@ -252,7 +252,7 @@ function write-message-and-3pair-in-colour {
 
   if ($colouredText.Length -eq 7) {
 
-    write-host-in-colour -colouredTextLine @(
+    Write-InColour -colouredTextLine @(
       ($colouredText[0]), (" ==> ", "White"),
       ($colouredText[1]), (": '", "White"), ($colouredText[2]), ("', ", "White"),
       ($colouredText[3]), (": '", "White"), ($colouredText[4]), ("', ", "White"),
@@ -262,6 +262,6 @@ function write-message-and-3pair-in-colour {
   else {
 
     $len = $colouredText.Length;
-    Write-Warning "write-message-and-3pair-in-colour: Malformed message, Field length: $len";
+    Write-Warning "Write-MessageAnd3PairInColour: Malformed message, Field length: $len";
   }
 }

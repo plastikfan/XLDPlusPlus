@@ -15,6 +15,9 @@ Using the script, is pretty simple, all you need to provide is the root director
 
 - The recommended way to install Powershell would be to use [:beer: homebrew](https://brew.sh/), please see [this](https://docs.microsoft.com/en-us/powershell/scripting/install/installing-powershell-core-on-macos?view=powershell-7) for more info.
 - If this is the first time you're using Powershell on a Mac, then you will need to ensure that script execution is enabled, see [this](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.security/set-executionpolicy?view=powershell-7) for more info. In essence, to achieve this you'll need to run this command in a powershell session: *"Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope LocalMachine"*)
+
+### Setup
+
 - Currently, there is no installer for this script. Users who are familiar with git can acquire the repo via the *git clone* command on [this](https://github.com/plastikfan/xld-plus-plus-ps) url. Users who are not developers and unlikely to be familiar with git, can just click [:arrow_down:here](https://github.com/plastikfan/xld-plus-plus-ps/archive/master.zip), and save the resultant zip file to local drive and extract the archive to a location of choice.
 - To make this script available without having to manually source the script for every new PowerShell session, add it to your [PowerShell Profile](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7).
 
@@ -24,15 +27,15 @@ Before the command can be invoked, the script should be sourced in a powershell 
 
 > . ./xld-converter.ps1
 
-This will make the command *xld-batch-convert* available to use and is commonly invoked as follows:
+This will make the command *Convert-Audio* available to use and is commonly invoked as follows:
 
-> $ xld-batch-convert -source \<source\> -destination \<destination\> -from \<from\> -to \<to\>
+> $ Convert-Audio -source \<source\> -destination \<destination\> -from \<from\> -to \<to\>
 
 The source directory tree is replicated in the destination with the result of converting audio files of the type indicated by \<from\> to the format specified by \<to\>.
 
 For example:
 
-> xld-batch-convert -source '/Volumes/Envy/Music/HI-RES' -destination '/Users/Plastikfan/Music/HI-RES' -from "wav" -to "flac"
+> Convert-Audio -source '/Volumes/Envy/Music/HI-RES' -destination '/Users/Plastikfan/Music/HI-RES' -from "wav" -to "flac"
 
 will perform a *.wav* file to *.flac* file conversion replicating the whole directory structure from *'/Volumes/Envy/Music/HI-RES/'* to location '/Users/Plastikfan/Music/HI-RES/' (which will be created if it doesn't already exist prior to the batch run).
 
@@ -42,7 +45,7 @@ will perform a *.wav* file to *.flac* file conversion replicating the whole dire
 
 Use the *-copyFiles* argument
 
-- Denotes which other files to copy over from the source tree to the destination expressed as a csv of file suffixes. The copied files will not include any files whose suffix match either $from or $to, in order to avoid the potential for name clashes. This is really meant for auxiliary files like cover art jpg images and text files, or any other such meta data. The default is "*" meaning that all files are copied over subject to the caveats just mentioned.
+- Denotes which other files to copy over from the source tree to the destination expressed as a csv of file suffixes. The copied files will not include any files whose suffix match either $from or $to, in order to avoid the potential for name clashes. This is really meant for auxiliary files like cover art jpg images and text files, or any other such meta data. The default is "*" meaning that all files are copied over subject to the caveats just mentioned. (To disable the copying of any other files to the destination, use *-copyFiles=""*)
 
 Eg: to copy over just text files (\*.txt) and jpeg images (\*.jp\*g), specify: -copyFiles "\*.txt,\*.jp\*g"
 
@@ -59,6 +62,12 @@ Use the *-Skip* switch argument
 Use the *-WhatIf* switch argument
 
 - Dry-run the operation, to see which files would be converted during the batch process.
+
+#### ~ Command alias
+
+An alias has been defined the *Convert-Audio* command as *cvaudio* for further convenience so the generic example shown previously could be invoked as:
+
+> cvaudio -source '/Volumes/Envy/Music/HI-RES' -destination '/Users/Plastikfan/Music/HI-RES' -from "wav" -to "flac"
 
 ### And finally ...
 

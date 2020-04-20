@@ -6,7 +6,7 @@
 
 <#
 .NAME
-  run-batch
+  Invoke-ConversionBatch
 
 .SYNOPSIS
   Executes the conversion batch.
@@ -39,7 +39,7 @@
 .PARAMETER $WhatIf
   Dry-run the operation.
 #>
-function run-batch {
+function Invoke-ConversionBatch {
   param
   (
     [parameter(Mandatory = $true)] [String]$source,
@@ -64,10 +64,10 @@ function run-batch {
     [string]$format = $properties["TO-FORMAT"];
     [boolean]$skipExisting = $properties.ContainsKey("SKIP");
 
-    [string]$destinationBranch = Subtract-First -target $sourceFullname -subtract $rootSource;
+    [string]$destinationBranch = Edit-SubtractFirst -target $sourceFullname -subtract $rootSource;
     [string]$destinationAudioFilename = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
-    $destinationAudioFilename = ((Truncate-Extension -path $destinationAudioFilename) + "." + $format);
-    write-pair-in-colour @( ("destination audio file", "Yellow"), ($destinationAudioFilename, "Red") );
+    $destinationAudioFilename = ((Edit-TruncateExtension -path $destinationAudioFilename) + "." + $format);
+    Write-PairInColour @( ("destination audio file", "Yellow"), ($destinationAudioFilename, "Red") );
 
     [string]$command = ("xld -f '" + $format + "' -o '" + $destinationAudioFilename + "' '" + $sourceFullname + "'");
     [boolean]$doConversion = $true;
@@ -82,7 +82,7 @@ function run-batch {
     }
   
     if ($doConversion) {
-      write-pair-in-colour @( ("command: ", "Red"), ($command, "Green") );
+      Write-PairInColour @( ("command: ", "Red"), ($command, "Green") );
       # TODO: invoke the command
       #
       # Invoke-Expression -Command $command
@@ -110,7 +110,7 @@ function run-batch {
     [string]$suffix = $properties["FROM-SUFFIX"];
     [string]$includes = $properties["COPY-FILES"];
     [string]$format = $properties["TO-FORMAT"];
-    write-pair-in-colour @( ("Copy files ...", "Blue"), ($includes, "Red") );
+    Write-PairInColour @( ("Copy files ...", "Blue"), ($includes, "Red") );
 
     [scriptblock]$isCopyCandidate = { param($underscore)
       [string]$filename = $underscore.Name;
@@ -125,17 +125,17 @@ function run-batch {
       [string]$rootDestination = $properties["ROOT-DESTINATION"];
 
 
-      [string]$destinationBranch = Subtract-First -target $sourceFullname -subtract $rootSource;
+      [string]$destinationBranch = Edit-SubtractFirst -target $sourceFullname -subtract $rootSource;
       [string]$copyToDestinationFullName = Join-Path -Path $rootDestination -ChildPath $destinationBranch;
 
       Copy-Item -LiteralPath $sourceFullname -Destination $copyToDestinationFullName -WhatIf;
     }
 
-    foreach-file -Directory $source -inclusions $includes -condition $isCopyCandidate -body $doCopySingleFile `
+    Invoke-ForeachFile -Directory $source -inclusions $includes -condition $isCopyCandidate -body $doCopySingleFile `
       -propertyBag $propertyBag -Verb;
   }
 
-  traverse-directory -source $source -destination $destination -suffix $from `
+  Invoke-TraverseDirectory -source $source -destination $destination -suffix $from `
     -onSourceFile $doAudioFileConversion -propertyBag $propertyBag -onSourceDirectory $doCopyFiles;
 }
 
@@ -144,7 +144,7 @@ function run-batch {
   https://tmkk.undo.jp/xld/index_e.html
 
 .NAME
-  xld-batch-convert
+  Convert-Audio
 
 .SYNOPSIS
   The entry point into the converter
@@ -178,7 +178,7 @@ function run-batch {
 .PARAMETER $WhatIf
   Dry-run the operation.
 #>
-function xld-batch-convert {
+function Convert-Audio {
   param
   (
     [parameter(Mandatory = $true)] [String]$source,
@@ -213,5 +213,7 @@ function xld-batch-convert {
     return;
   }
 
-  run-batch -source $source -destination $destination -from $from -to $to -copyFiles $copyFiles
+  Invoke-ConversionBatch -source $source -destination $destination -from $from -to $to -copyFiles $copyFiles
 }
+
+Set-Alias -Name cvaudio -Value Convert-Audio

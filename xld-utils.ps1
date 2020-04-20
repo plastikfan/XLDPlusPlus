@@ -13,24 +13,13 @@ function Get-DateOrdinalSuffix([datetime]$date) {
   }
 }
 
-# function Get-FormattedDateWithOrdinalSuffix([datetime]$date, [String]$format) {
-
-#   [String]$result = $date.ToString($format);
-#   [String]$suffix = Get-DateOrdinalSuffix($date);
-
-#   $suffix = $date.Day.ToString() + $suffix;
-#   $result = $result -replace "\d{,2}",$suffix;
-
-#   return $result;
-# }
-
 function Get-FriendlyDate([datetime]$date) {
 
   [String]$suffix = Get-DateOrdinalSuffix($date);
   return  "{0}{1} {2:MMMM} {3}" -f $date.Day, $suffix, $date, $date.Year;
 }
 
-function Show-Console-Colours {
+function Show-ConsoleColours {
 
   [Array]$colours = @("Black", "DarkBlue", "DarkGreen", "DarkCyan", "DarkRed", "DarkMagenta", `
       "DarkYellow", "Gray", "DarkGray", "Blue", "Green", "Cyan", "Red", "Magenta", "Yellow", "White");
@@ -38,14 +27,6 @@ function Show-Console-Colours {
   foreach ($col in $colours) {
     Write-Host -ForegroundColor $col $col;
   }
-}
-
-# https://stackoverflow.com/questions/26997511/how-can-you-test-if-an-object-has-a-specific-property
-#
-# https://powertoe.wordpress.com/2011/03/31/combining-objects-efficiently-use-a-hash-table-to-index-a-collection-of-objects/
-#
-function Has-Property($obj, $propertyName) {
-  return $propertyName -in $obj.properties;
 }
 
 function Add-WildCard {
@@ -63,27 +44,9 @@ function Add-WildCard {
   }
 }
 
-function Replace-First {
-  param
-  (
-    [string]$source,
-    [string]$target,
-    [string]$with
-  )
-
-  [string]$result = $source;
-  [int]$foundAt = $source.IndexOf($target, 0);
-
-  if ($foundAt -ge 0) {
-    $result = $result.Substring(0, $foundAt) + $with + $result.Substring($foundAt + $target.Length);
-  }
-
-  return $result;
-}
-
-# This methods required because System.IO.Path.GetFileNameWithoutExtension does not seem to be available on macPS.
+# This method required because System.IO.Path.GetFileNameWithoutExtension does not seem to be available on macPS.
 #
-function Truncate-Extension {
+function Edit-TruncateExtension {
   param
   (
     [String]$path
@@ -102,12 +65,12 @@ function Truncate-Extension {
 
 <#
 .NAME
-    Subtract-First
+    Edit-SubtractFirst
 
 .SYNOPSIS
     Given a target string, returns the result of removing a string from it
 #>
-function Subtract-First {
+function Edit-SubtractFirst {
   param
   (
     [String]$target,
@@ -132,6 +95,9 @@ function Subtract-First {
 }
 
 <#
+.NAME
+    Get-SortedFilesNatural
+
 .SYNOPSIS
   Sort a collection of files from the pipeline in natural order
 
@@ -142,7 +108,7 @@ function Subtract-First {
 .PARAMETER $pipeline
     collection of files from pipeline to be sorted
 #>
-function Sort-FilesNatural {
+function Get-SortedFilesNatural {
   param
   (
     [parameter(Mandatory = $true, ValueFromPipeline = $true, ValueFromPipelineByPropertyName = $true)]
