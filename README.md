@@ -1,4 +1,4 @@
-# :musical_score: xld-plus-plus-ps
+# :musical_score: XLDPlusPlus
 *Batch conversion helper for 'X Lossless Decoder'*
 
 :warning: Warning: do not use until this message has been removed.
@@ -7,7 +7,7 @@
 
 [**XLD**](https://tmkk.undo.jp/xld/index_e.html) is a :rocket: great tool for performing lossless audio conversion. However, using the GUI tool, it quickly became apparent, for large audio collections there was a need to perform a batch run of conversions. The GUI tool is not well suited to this task since there is no way to specify different output paths for each individual source file. The only thing you can do is to opt to produce the output file in the same as the source and this restriction also applies to the command line. Wouldn't it be great if we could mirror the source directory tree into a new destination tree, producing the result of converted audio files in the corresponding output path.
 
-Enter, **xld-plus-plus-ps**!! This is a suite of powershell scripts that performs just this function. Powershell, I hear you scoff. Fear not since those fellows at Microsoft have made Powershell a truly multi-platform scripting environment.
+Enter, **XLDPlusPlus**!! This is a suite of powershell scripts that performs just this function. Powershell, I hear you scoff. Fear not since those fellows at Microsoft have made Powershell a truly multi-platform scripting environment.
 
 Using the script, is pretty simple, all you need to provide is the root directory of the audio library that needs to be converted, the root directory where the converted library is to be produced, the file suffix of the original audio files and the format that they should be converted to. Please note that during a single batch run, only one source format and destination format can be specified. The user should refer to the documentation of XLD to find supported audio formats.
 
@@ -18,14 +18,14 @@ Using the script, is pretty simple, all you need to provide is the root director
 
 ### Setup
 
-- Currently, there is no installer for this script. Users who are familiar with git can acquire the repo via the *git clone* command on [this](https://github.com/plastikfan/xld-plus-plus-ps) url. Users who are not developers and unlikely to be familiar with git, can just click [:arrow_down:here](https://github.com/plastikfan/xld-plus-plus-ps/archive/master.zip), and save the resultant zip file to local drive and extract the archive to a location of choice.
+- Currently, there is no installer for this script. Users who are familiar with git can acquire the repo via the *git clone* command on [this](https://github.com/plastikfan/XLDPlusPlus) url. Users who are not developers and unlikely to be familiar with git, can just click [:arrow_down:here](https://github.com/plastikfan/XLDPlusPlus/archive/master.zip), and save the resultant zip file to local drive and extract the archive to a location of choice.
 - To make this script available without having to manually source the script for every new PowerShell session, add it to your [PowerShell Profile](https://docs.microsoft.com/en-us/powershell/module/microsoft.powershell.core/about/about_profiles?view=powershell-7).
 
 ### The command line
 
 Before the command can be invoked, the script should be sourced in a powershell session (unless this has been done automatically via the PowerShell profile as previously mentioned) as follows
 
-> . ./xld-converter.ps1
+> . ./XLDPlusPlus.psm1
 
 This will make the command *Convert-Audio* available to use and is commonly invoked as follows:
 
@@ -71,4 +71,4 @@ An alias has been defined the *Convert-Audio* command as *cvaudio* for further c
 
 ### And finally ...
 
-This tool was created to fulfil a personal need to batch convert a large digital audio collection. Not all capabilities of XLD are invoked by this script, but hopefully it is useful enough to other like-minded folk. Feel free to raise new issues [here](https://github.com/plastikfan/xld-plus-plus-ps/issues) and depending on the request, I'll be :smiley: to oblige by making :hammer:enhancements/:bug:bug fixes.
+This tool was created to fulfil a personal need to batch convert a large digital audio collection. Not all capabilities of XLD are invoked by this script, but hopefully it is useful enough to other like-minded folk. Feel free to raise new issues [here](https://github.com/plastikfan/XLDPlusPlus/issues) and depending on the request, I'll be :smiley: to oblige by making :hammer:enhancements/:bug:bug fixes.
