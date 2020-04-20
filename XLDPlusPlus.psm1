@@ -1,3 +1,6 @@
+
+Set-StrictMode -Version 1.0;
+
 <#
 .NAME
   Invoke-ConversionBatch
