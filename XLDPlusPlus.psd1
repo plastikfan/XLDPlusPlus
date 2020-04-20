@@ -87,8 +87,8 @@ AliasesToExport = @("cvaudio")
 # ModuleList = @()
 
 # List of all files packaged with this module
-FileList = @("xld-definitions.ps1", "write-in-colour.ps1", "xld-utils.ps1", "iterate.ps1", "xld-converter.ps1",
-    "LICENSE", "README.md", "XLDPplusPlus.psm1", "XLDPplusPlus.psd1")
+FileList = @("xld-definitions.ps1", "write-in-colour.ps1", "xld-utils.ps1", "iterate.ps1",
+    "LICENSE", "README.md", "XLDPlusPlus.psm1", "XLDPlusPlus.psd1")
 
 # Private data to pass to the module specified in RootModule/ModuleToProcess. This may also contain a PSData hashtable with additional module metadata used by PowerShell.
 PrivateData = @{

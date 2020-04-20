@@ -276,7 +276,7 @@ function Invoke-TraverseDirectory {
     Write-PairInColour @( ("destination directory", "Yellow"), ($destinationDirectory, "Red") );
 
     Invoke-TraverseDirectory -source $sourceDirectoryFullName -destination $destinationDirectory `
-      -suffix $from -onSourceFile $onSourceFile -propertyBag $propertyBag -onSourceDirectory $onSourceDirectory;
+      -suffix $suffix -onSourceFile $onSourceFile -propertyBag $propertyBag -onSourceDirectory $onSourceDirectory;
 
     return @{ Message = "*** Convert directory contents"; Product = $sourceDirectoryName; Colour = $contentsColour };
   }
