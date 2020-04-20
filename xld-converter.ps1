@@ -1,8 +1,9 @@
+<#
 . ./xld-definitions.ps1
 . ./write-in-colour.ps1
 . ./xld-utils.ps1
 . ./iterate.ps1
-
+#>
 
 <#
 .NAME
