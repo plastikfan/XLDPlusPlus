@@ -1,7 +1,7 @@
 # :musical_score: XLDPlusPlus
 *Batch conversion helper for 'X Lossless Decoder'*
 
-:warning: Warning: do not use until this message has been removed.
+:no_entry_sign: Deprication Warning: this repo is going to be retired in favour of XLosslessDecoderBatch, due to me having learnt more about doing PowerShell module the 'proper' way.
 
 ### Introduction
 
